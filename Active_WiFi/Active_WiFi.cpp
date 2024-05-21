@@ -4,14 +4,14 @@
 | Created by:     Cameron Jupp
 | Date Started:   December 3, 2022
 --------------------------------------------------------------------------------------------------------------------*/
-
+#include "Active_WiFi.h"
 #include <Arduino.h>
 #include <WiFi.h>
 #include <stdio.h>
 #include <EEPROM.h>
+#include "Serial_Tools.h"
 
-#include "active_wifi.h"
-#include "serial_tools.h"
+
 
 // -------------------------------------------------------------------------------------------------------------------- //
 // -------------------------- / ___/  / /     / __  /  / _ /    / _\      / /     / ____/ ----------------------------- //
