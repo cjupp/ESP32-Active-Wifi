@@ -4,6 +4,11 @@
 | Created by:     Cameron Jupp
 | Date Started:   December 3, 2022
 --------------------------------------------------------------------------------------------------------------------*/
+#include <Arduino.h>
+#include <WiFi.h>
+#include <stdio.h>
+#include <EEPROM.h>
+#include "Serial_Tools.h"
 
 #ifndef ACTIVE_WIFI_H
 #define ACTIVE_WIFI_H
@@ -19,6 +24,7 @@
 
 #define SSID_CHAR_LIM		32
 #define PASSWORD_CHAR_LIM	64
+
 #define CONFIGURED			1
 #define UNCONFIGURED		-1
 
@@ -38,19 +44,19 @@ class WAP
 
 	public:
 
-	char get_status()
+	char GetStatus()
 	{
 		return status;
 	}
 
 
-	char* get_ssid()
+	char* GetSSID()
 	{
 		return this->ssid;
 	}
 
 
-	char* get_password()
+	char* GetPassword()
 	{
 		return this->password;
 	}
@@ -67,7 +73,7 @@ class WAP
   }
 
   
-  void save(char * addr_ptr, int data_sz)
+  void SaveInEEPROM(char * addr_ptr, int data_sz)
   { 
     for(int i = 0; i < data_sz; i++)
     {
@@ -77,87 +83,89 @@ class WAP
   }
   
   
-  void load(char * addr_ptr, int data_sz)
+  void LoadFromEEPROM(char * addr_ptr, int data_sz)
   {
     for(int i = 0; i < data_sz; i++)
     {
       addr_ptr[i] = EEPROM.read(i);
     }
   }
-
-
-  int config()
-  {
-      //Select the element of the array you want to overwrite
-  //Serial.print("Please enter the ");
+ 
   
-  //Request the access point information
-  Serial.println("Enter the SSID: ");
-  this->set_ssid(serial_gets());
-
-  Serial.println("Enter the password: ");
-  this->set_password(serial_gets());
-
-  //Check to see if the network connects
-  return this->connect();
-
-  }
-  
-  
-  void set_ssid(char * new_ssid)
+  void SetSSID(char * new_ssid)
   {
     copy_str(new_ssid, this->ssid);
   }
 
 
-  void set_password(char * new_password)
+  void SetPassword(char * new_password)
   {
     copy_str(new_password, this->password);
   }
 
-
-  int connect()
+  char* GetIPAddress()
   {
-    //Disconnect before attempting to connect
+	return Wifi.localIP();
+  }
+
+  bool WiFiConnected()
+  {
+	return WiFi.status() == WL_CONNECTED;
+  }
+
+  bool ConnectionTimedOut(unsigned long startTime)
+  {
+	return ((millis() - startTime) > WIFI_TIMEOUT_MS);
+  }	
+
+	bool Disconnect()
+	{
+		Wifi.disconnect();
+	}
+
+	void WaitForConnection()
+	{
+		unsigned long startAttemptTime = millis();
+
+		while(!IsWiFiConnected() && !ConnectionTimedOut(startAttemptTime))
+		{
+			Serial.print(".");
+			delay(100);
+		}
+	}
+
+  bool Connect()
+  {
+    //Disconnect before attempting to Connect
     WiFi.disconnect();
 
     //Display information to console
     Serial.print("Connecting to network:");
 
-    //Switch to station mode and connect to the 
+    //Switch to station mode and Connect to the 
     WiFi.mode(WIFI_STA);
     WiFi.begin(this->ssid, this->password);
 
-    unsigned long startAttemptTime = millis();
+	WaitForConnection();
 
-    while(WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < WIFI_TIMEOUT_MS)
-    {
-      Serial.print(".");
-      delay(100);
-    }
 
-    Serial.println();
-    char * wap_ptr = (char*)this;
-    
     if (WiFi.status() == WL_CONNECTED)
     {
-      //Display message and save configuration as configured
+      //Display message and SaveInEEPROM configuration as configured
       Serial.println("Wifi connected!");
       this->status = CONFIGURED;
-      this->save(wap_ptr, sizeof(*this));
+      this->SaveInEEPROM(this, sizeof(*this));
 
-      //Print out the IP address
-      //Serial.println("IP Address: ");
-      //Serial.println(Wifi.localIP());
-      return 0;
+      return true;
     }
+
     else
     {
-      //Display message and save configuration as unconfigured
-      Serial.println("Could not connect to WiFi network");
+      //Display message and SaveInEEPROM configuration as unconfigured
+      Serial.println("Could not Connect to WiFi network");
       this->status = UNCONFIGURED;
-      this->save(wap_ptr, sizeof(*this));
-      return -1;
+      this->SaveInEEPROM(this, sizeof(*this));
+      return false;
     }
   }
 };
@@ -219,14 +227,14 @@ class Network_Manager
 		
 		//Create a pointer for the first access point and treat it as an array of bytes 
 		char* wap_ptr = (char*)&network_list[0];
-		network_list[0].load(wap_ptr, sizeof(network_list[0]));
+		network_list[0].LoadFromEEPROM(wap_ptr, sizeof(network_list[0]));
 
 		//Serial.println(network_list[0].status);
 
-		if(network_list[0].get_status() == CONFIGURED)
+		if(network_list[0].GetStatus() == CONFIGURED)
 		{
 			Serial.println("Network found!");
-			network_list[0].connect();
+			network_list[0].Connect();
 			return 0;
 		}
 		else
@@ -237,19 +245,33 @@ class Network_Manager
 		}
 	}
 
-	void get_available_ssids()
-	{
-		//Scan wifi access points
-
-		//Write them to a variable/array
-
-		//display them to the serial monitor
-
-		//return array of names
-	
-	}
-
 };
+
+
+int RefreshAvailableSSIDs()
+{
+	//Get list of available connections
+	int numSSID = 0;
+	char SSID[32];
+
+	WiFi.mode(WIFI_STA);
+	WiFi.disconnect();
+
+	numSSID = WiFi.scanNetworks();
+
+	return numSSID;
+}
+
+char* GetSSIDList()
+{
+	int numSSID = RefreshAvailableSSIDs();
+
+	//Make sure to delete and free up the memory after use
+	char* ssidList = new char[SSID_CHAR_LIM][numSSID];
+
+	return ssidList;
+
+}
 
 
 

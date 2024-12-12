@@ -47,9 +47,9 @@ class WAP
 
   int config();
 
-  void set_ssid(char * new_ssid);
+  void SetSSID(char * new_ssid);
 
-  void set_password(char * new_password);
+  void SetPassword(char * new_password);
 
   int connect();
 };

@@ -133,10 +133,10 @@ WAP network_list[NETLIST_SZ];
   
   //Request the access point information
   Serial.println("Enter the SSID: ");
-  this->set_ssid(serial_gets());
+  this->SetSSID(serial_gets());
 
   Serial.println("Enter the password: ");
-  this->set_password(serial_gets());
+  this->SetPassword(serial_gets());
 
   //Check to see if the network connects
   return this->connect();
@@ -160,7 +160,7 @@ WAP network_list[NETLIST_SZ];
 | Date:       {Date}
 | Edited:     {Date}  
 ----------------------------------------------------------------------------------------------------------------------*/
-  void WAP::set_ssid(char * new_ssid)
+  void WAP::SetSSID(char * new_ssid)
   {
     copy_str(new_ssid, this->ssid);
   }
@@ -182,7 +182,7 @@ WAP network_list[NETLIST_SZ];
 | Date:       {Date}
 | Edited:     {Date}  
 ----------------------------------------------------------------------------------------------------------------------*/
-  void WAP::set_password(char * new_password)
+  void WAP::SetPassword(char * new_password)
   {
     copy_str(new_password, this->password);
   }
