@@ -7,11 +7,9 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <stdio.h>
-#include <EEPROM.h>
-#include "Serial_Tools.h"
 
-#ifndef ACTIVE_WIFI_H
-#define ACTIVE_WIFI_H
+#ifndef ACTIVE_WIFI_V2_H
+#define ACTIVE_WIFI_V2_H
 
 // -------------------------------------------------------------------------------------------------------------------- //
 // --------------------------- /    \   / ___/  / ___/  /_  _/  / \  / /  / ___/  / ____/ ----------------------------- //
@@ -73,24 +71,6 @@ class WAP
   }
 
   
-  void SaveInEEPROM(char * addr_ptr, int data_sz)
-  { 
-    for(int i = 0; i < data_sz; i++)
-    {
-      EEPROM.write(i, addr_ptr[i]);
-      EEPROM.commit(); 
-    }
-  }
-  
-  
-  void LoadFromEEPROM(char * addr_ptr, int data_sz)
-  {
-    for(int i = 0; i < data_sz; i++)
-    {
-      addr_ptr[i] = EEPROM.read(i);
-    }
-  }
- 
   
   void SetSSID(char * new_ssid)
   {
@@ -151,20 +131,18 @@ class WAP
 
     if (WiFi.status() == WL_CONNECTED)
     {
-      //Display message and SaveInEEPROM configuration as configured
+      //Display message 
       Serial.println("Wifi connected!");
       this->status = CONFIGURED;
-      this->SaveInEEPROM(this, sizeof(*this));
 
       return true;
     }
 
     else
     {
-      //Display message and SaveInEEPROM configuration as unconfigured
+      //Display message 
       Serial.println("Could not Connect to WiFi network");
       this->status = UNCONFIGURED;
-      this->SaveInEEPROM(this, sizeof(*this));
       return false;
     }
   }
@@ -213,8 +191,6 @@ class Network_Manager
 
 	void init_wifi_system()
 	{
-		//Initialize the EEPROM memory
-		EEPROM.begin(512);
 
 		start_check();
 
@@ -223,11 +199,7 @@ class Network_Manager
 	int start_check()
 	{ 
 		//Display message to serial terminal
-		Serial.println("Checking for previous wifi configuration...");
-		
-		//Create a pointer for the first access point and treat it as an array of bytes 
-		char* wap_ptr = (char*)&network_list[0];
-		network_list[0].LoadFromEEPROM(wap_ptr, sizeof(network_list[0]));
+		Serial.println("Checking for configured wifi configuration...");
 
 		//Serial.println(network_list[0].status);
 
@@ -272,8 +244,5 @@ char* GetSSIDList()
 	return ssidList;
 
 }
-
-
-
 
 #endif
