@@ -85,10 +85,10 @@ class WAP
 
   char* GetIPAddress()
   {
-	return Wifi.localIP();
+	return WiFi.localIP();
   }
 
-  bool WiFiConnected()
+  bool IsWiFiConnected()
   {
 	return WiFi.status() == WL_CONNECTED;
   }
@@ -100,7 +100,7 @@ class WAP
 
 	bool Disconnect()
 	{
-		Wifi.disconnect();
+		WiFi.disconnect();
 	}
 
 	void WaitForConnection()
@@ -163,25 +163,25 @@ class Network_Manager
 
 
 	public:
-	void Set_WAP_SSID()
+	void SetWapSsid()
 	{
 
 	}
 
 
-	void Set_WAP_Password(char* password)
+	void SetWapPassword(char* password)
 	{
 
 	}
 
 
-	void Add_New_WAP()
+	void AddNewWap()
 	{
 
 	}
 
 
-	int Try_All_Saved_WAPS()
+	int TryAllSavedWAPS()
 	{
 
 	}
@@ -189,14 +189,14 @@ class Network_Manager
 
 
 
-	void init_wifi_system()
+	void Init()
 	{
 
-		start_check();
+		StartCheck();
 
 	}
 
-	int start_check()
+	int StartCheck()
 	{ 
 		//Display message to serial terminal
 		Serial.println("Checking for configured wifi configuration...");
@@ -212,7 +212,7 @@ class Network_Manager
 		else
 		{
 			Serial.println("No configuration found. Starting setup...");
-			init_wifi(&network_list[0]);
+			//init_wifi(&network_list[0]);
 			return -1;
 		}
 	}
