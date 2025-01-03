@@ -60,30 +60,54 @@ class WAP
 	}
 
 
-  void copy_str(char * in_str, char * out_str)
+  void copy_str(char * source, int sourceLen, char * destination, int destinationLen)
   {
+	Serial.println("Copying string");
+
     int i = 0;
+	int charLimit = 0;
 
-    do
-    {
-      out_str[i] = in_str[i];
-    }while(in_str[i++] != '\0' && i < CHAR_LIM);
+	//Choose character limit
+	if(sourceLen < destinationLen)
+	{
+		charLimit = sourceLen;
+	}
+	else if(destinationLen < sourceLen)
+	{
+		charLimit = sourceLen;
+	}
+
+	Serial.print("Character limit: ");
+	Serial.println(charLimit, DEC);
+
+
+	while(i < charLimit && source[i] != '\0')
+	{
+		destination[i] = source[i];
+		i++;		
+	}
+
+	Serial.println("Destination: ");
+	Serial.println(destination);
+
   }
 
   
   
-  void SetSSID(char * new_ssid)
-  {
-    copy_str(new_ssid, this->ssid);
-  }
+	void SetSSID(char * new_ssid, int strLen)
+	{
+		Serial.println("Setting SSID");
+		copy_str(new_ssid, strLen, this->ssid, SSID_CHAR_LIM);
+	}
 
 
-  void SetPassword(char * new_password)
-  {
-    copy_str(new_password, this->password);
-  }
+	void SetPassword(char * pNewPassword, int strLen)
+	{
+		Serial.println("Setting password");
+		copy_str(pNewPassword, strLen, this->password, PASSWORD_CHAR_LIM);
+	}
 
-  char* GetIPAddress()
+  IPAddress GetIPAddress()
   {
 	return WiFi.localIP();
   }
@@ -234,14 +258,9 @@ int RefreshAvailableSSIDs()
 	return numSSID;
 }
 
-char* GetSSIDList()
+void GetSSIDList()
 {
-	int numSSID = RefreshAvailableSSIDs();
 
-	//Make sure to delete and free up the memory after use
-	char* ssidList = new char[SSID_CHAR_LIM][numSSID];
-
-	return ssidList;
 
 }
 
