@@ -72,7 +72,7 @@ class WAP
 	{
 		charLimit = sourceLen;
 	}
-	else if(destinationLen < sourceLen)
+	else if(destinationLen <= sourceLen)
 	{
 		charLimit = sourceLen;
 	}
@@ -81,11 +81,13 @@ class WAP
 	Serial.println(charLimit, DEC);
 
 
-	while(i < charLimit && source[i] != '\0')
+	while(i < charLimit-1 && source[i] != '\0')
 	{
 		destination[i] = source[i];
 		i++;		
 	}
+
+	destination[i] = '\0';
 
 	Serial.println("Destination: ");
 	Serial.println(destination);
@@ -97,15 +99,16 @@ class WAP
 	void SetSSID(char * new_ssid, int strLen)
 	{
 		Serial.println("Setting SSID");
-		copy_str(new_ssid, strLen, this->ssid, SSID_CHAR_LIM);
+		copy_str(new_ssid, SSID_CHAR_LIM, this->ssid, SSID_CHAR_LIM);
 	}
 
 
 	void SetPassword(char * pNewPassword, int strLen)
 	{
 		Serial.println("Setting password");
-		copy_str(pNewPassword, strLen, this->password, PASSWORD_CHAR_LIM);
+		copy_str(pNewPassword, PASSWORD_CHAR_LIM, this->password, PASSWORD_CHAR_LIM);
 	}
+
 
   IPAddress GetIPAddress()
   {
@@ -122,7 +125,7 @@ class WAP
 	return ((millis() - startTime) > WIFI_TIMEOUT_MS);
   }	
 
-	bool Disconnect()
+	void Disconnect()
 	{
 		WiFi.disconnect();
 	}
@@ -143,8 +146,16 @@ class WAP
     //Disconnect before attempting to Connect
     WiFi.disconnect();
 
+	Serial.print("SSID: ");
+	Serial.println(this->ssid);
+
+	Serial.print("Password: ");
+	Serial.println(this->password);
+
     //Display information to console
     Serial.print("Connecting to network:");
+
+	
 
     //Switch to station mode and Connect to the 
     WiFi.mode(WIFI_STA);
@@ -207,7 +218,7 @@ class Network_Manager
 
 	int TryAllSavedWAPS()
 	{
-
+		return 0;
 	}
 
 
@@ -248,7 +259,6 @@ int RefreshAvailableSSIDs()
 {
 	//Get list of available connections
 	int numSSID = 0;
-	char SSID[32];
 
 	WiFi.mode(WIFI_STA);
 	WiFi.disconnect();
